@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>{% block title %}Cổng Thực Tập{% endblock %}</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<header class="top">
+  <div class="brand">
+    <div class="brand-mark">TT</div>
+    <div>
+      <div class="brand-text">Cổng Thực Tập</div>
+      <div class="brand-sub">{% block brand_sub %}Khoa Công nghệ Thông tin{% endblock %}</div>
+    </div>
+  </div>
+  <nav class="topnav">
+    <a href="{{ url_for('uc03_dang_ky') }}" class="{{ 'active' if request.endpoint == 'uc03_dang_ky' else '' }}">Đăng ký (UC-03)</a>
+    <a href="{{ url_for('uc04_phe_duyet') }}" class="{{ 'active' if request.endpoint == 'uc04_phe_duyet' else '' }}">Phê duyệt (UC-04)</a>
+  </nav>
+</header>
+
+<div class="wrap">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, msg in messages %}
+        <div class="flash flash-{{ category }}">{{ msg }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  {% block content %}{% endblock %}
+</div>
+
+</body>
+</html>

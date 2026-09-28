@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% block title %}UC-03 · Đăng ký vị trí thực tập{% endblock %}
+{% block content %}
+
+<h1 class="page-title">Đăng ký vị trí thực tập</h1>
+<div class="page-sub">UC-03 · Chọn một vị trí đang mở và điền thông tin để gửi đăng ký.</div>
+
+{% if don_cho_duyet %}
+  <div class="flash flash-error">
+    Bạn đang có 1 đơn đăng ký "<b>{{ don_cho_duyet.vi_tri.ten_vi_tri }}</b>" ở trạng thái Chờ duyệt.
+    Bạn chỉ được có 1 đơn chờ duyệt tại một thời điểm.
+  </div>
+{% endif %}
+
+<div class="grid">
+  <div class="card form-card">
+    <div class="section-title">Thông tin đăng ký</div>
+
+    <form method="POST" action="{{ url_for('uc03_dang_ky_submit') }}" enctype="multipart/form-data">
+      <div class="field-row">
+        <div>
+          <label>Họ và tên</label>
+          <input type="text" value="{{ sinh_vien.ho_ten }}" disabled>
+        </div>
+        <div>
+          <label>MSSV</label>
+          <input type="text" value="{{ sinh_vien.mssv }}" disabled>
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div>
+          <label>Lớp</label>
+          <input type="text" value="{{ sinh_vien.lop }}" disabled>
+        </div>
+        <div>
+          <label>Trường</label>
+          <input type="text" value="{{ sinh_vien.truong }}" disabled>
+        </div>
+      </div>
+
+      <div class="field-row full">
+        <div>
+          <label>Vị trí đăng ký <span style="color:var(--rust)">*</span></label>
+          <select name="vi_tri_id" required {{ 'disabled' if don_cho_duyet }}>
+            <option value="">-- Chọn vị trí từ danh sách bên phải --</option>
+            {% for vt in vi_tri_list %}
+              <option value="{{ vt.id }}">{{ vt.ten_vi_tri }} — {{ vt.cong_ty }} (còn {{ vt.so_cho_con }} chỗ)</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div>
+          <label>Ngày mong muốn bắt đầu <span style="color:var(--rust)">*</span></label>
+          <input type="date" name="ngay_bat_dau" min="{{ today }}" required {{ 'disabled' if don_cho_duyet }}>
+        </div>
+        <div>
+          <label>Thời gian thực tập</label>
+          <select name="thoi_gian_tuan" {{ 'disabled' if don_cho_duyet }}>
+            <option value="8">8 tuần</option>
+            <option value="10" selected>10 tuần</option>
+            <option value="12">12 tuần</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field-row full">
+        <label>CV / Hồ sơ đính kèm (PDF, tối đa 5MB) <span style="color:var(--rust)">*</span></label>
+        <input type="file" name="cv_file" accept=".pdf" {{ 'disabled' if don_cho_duyet }}>
+      </div>
+
+      <div class="field-row full">
+        <label>Ghi chú thêm</label>
+        <textarea name="ghi_chu" placeholder="Kinh nghiệm liên quan, mong muốn cụ thể…" {{ 'disabled' if don_cho_duyet }}></textarea>
+      </div>
+
+      <div class="commit-row">
+        <input type="checkbox" name="cam_ket" id="camket" required {{ 'disabled' if don_cho_duyet }}>
+        <label for="camket" style="margin:0;font-weight:400;">
+          Tôi cam kết thông tin khai báo ở trên là chính xác.
+        </label>
+      </div>
+
+      <div class="actions">
+        <button type="submit" class="btn btn-primary" {{ 'disabled' if don_cho_duyet }}>Gửi đăng ký →</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="card" style="padding:20px;">
+    <div class="section-title">Vị trí đang mở</div>
+    {% for vt in vi_tri_list %}
+      <div class="job">
+        <div class="job-top">
+          <div class="job-role">{{ vt.ten_vi_tri }}</div>
+          <div class="job-tag">Còn {{ vt.so_cho_con }} chỗ</div>
+        </div>
+        <div class="job-company">{{ vt.cong_ty }}</div>
+        <div class="job-meta">{{ vt.dia_diem }} · {{ vt.thoi_luong_tuan }} tuần</div>
+      </div>
+    {% else %}
+      <div class="empty">Hiện không có vị trí nào còn chỗ trống.</div>
+    {% endfor %}
+  </div>
+</div>
+
+{% endblock %}

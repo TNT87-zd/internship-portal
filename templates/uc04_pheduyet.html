@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}UC-04 · Phê duyệt đăng ký thực tập{% endblock %}
+{% block brand_sub %}Phòng Đào tạo{% endblock %}
+{% block content %}
+
+<h1 class="page-title">Phê duyệt đăng ký thực tập</h1>
+<div class="page-sub">UC-04 · Xét duyệt các đơn đăng ký vị trí thực tập do sinh viên gửi lên.</div>
+
+<div class="stats">
+  <div class="stat"><div class="num">{{ stats.tong }}</div><div class="lbl">Tổng số đơn</div></div>
+  <div class="stat pending"><div class="num">{{ stats.cho_duyet }}</div><div class="lbl">Chờ duyệt</div></div>
+  <div class="stat approved"><div class="num">{{ stats.da_duyet }}</div><div class="lbl">Đã duyệt</div></div>
+  <div class="stat rejected"><div class="num">{{ stats.tu_choi }}</div><div class="lbl">Từ chối</div></div>
+</div>
+
+<div class="grid">
+  <div class="card" style="padding-bottom:4px;">
+    <div class="tabs">
+      <a href="{{ url_for('uc04_phe_duyet', tab='cho_duyet') }}" class="{{ 'active' if tab=='cho_duyet' }}">Chờ duyệt</a>
+      <a href="{{ url_for('uc04_phe_duyet', tab='da_duyet') }}" class="{{ 'active' if tab=='da_duyet' }}">Đã duyệt</a>
+      <a href="{{ url_for('uc04_phe_duyet', tab='tu_choi') }}" class="{{ 'active' if tab=='tu_choi' }}">Từ chối</a>
+      <a href="{{ url_for('uc04_phe_duyet', tab='tat_ca') }}" class="{{ 'active' if tab=='tat_ca' }}">Tất cả</a>
+    </div>
+
+    {% for don in don_list %}
+      <a class="row {{ 'selected' if don_chon and don.id == don_chon.id }}"
+         href="{{ url_for('uc04_phe_duyet', tab=tab, chon=don.id) }}">
+        <div>
+          <div class="row-name">{{ don.sinh_vien.ho_ten }}</div>
+          <div class="row-sub">{{ don.sinh_vien.mssv }} · {{ don.sinh_vien.lop }}</div>
+        </div>
+        <div>
+          <div class="row-name" style="font-weight:500;">{{ don.vi_tri.ten_vi_tri }}</div>
+          <div class="row-sub">{{ don.vi_tri.cong_ty }}</div>
+        </div>
+        <div class="row-sub">{{ don.ngay_gui.strftime('%d/%m/%Y') }}</div>
+        <span class="badge {{ don.trang_thai }}">
+          {{ {'cho_duyet':'Chờ duyệt','da_duyet':'Đã duyệt','tu_choi':'Từ chối'}[don.trang_thai] }}
+        </span>
+      </a>
+    {% else %}
+      <div class="empty">Không có hồ sơ nào trong mục này.</div>
+    {% endfor %}
+  </div>
+
+  <div class="card detail">
+    {% if don_chon %}
+      <div class="detail-name">{{ don_chon.sinh_vien.ho_ten }}</div>
+      <div class="page-sub" style="margin-bottom:14px;">
+        {{ don_chon.sinh_vien.mssv }} · Lớp {{ don_chon.sinh_vien.lop }} ·
+        Gửi lúc {{ don_chon.ngay_gui.strftime('%H:%M, %d/%m/%Y') }}
+      </div>
+
+      <div class="kv"><span>Vị trí đăng ký</span><span>{{ don_chon.vi_tri.ten_vi_tri }}</span></div>
+      <div class="kv"><span>Đơn vị</span><span>{{ don_chon.vi_tri.cong_ty }}</span></div>
+      <div class="kv"><span>Ngày bắt đầu mong muốn</span><span>{{ don_chon.ngay_bat_dau.strftime('%d/%m/%Y') }}</span></div>
+      <div class="kv"><span>Thời gian thực tập</span><span>{{ don_chon.thoi_gian_tuan }} tuần</span></div>
+
+      {% if don_chon.cv_filename %}
+        <div class="kv"><span>CV</span>
+          <span><a href="{{ url_for('static', filename='uploads/' ~ don_chon.cv_filename) }}" target="_blank">Xem CV (PDF)</a></span>
+        </div>
+      {% endif %}
+
+      {% if don_chon.trang_thai == 'tu_choi' %}
+        <div class="kv"><span>Lý do từ chối</span><span>{{ don_chon.ly_do_tu_choi }}</span></div>
+      {% endif %}
+
+      {% if don_chon.trang_thai == 'cho_duyet' %}
+        <form method="POST" action="{{ url_for('uc04_tu_choi_don', don_id=don_chon.id) }}" style="margin-top:14px;">
+          <label>Lý do (bắt buộc nếu từ chối)</label>
+          <textarea name="ly_do" placeholder="Nhập lý do từ chối…"></textarea>
+          <div class="actions" style="justify-content:stretch;gap:10px;">
+            <button type="submit" class="btn btn-reject" style="flex:1;">✕ Từ chối</button>
+        </form>
+        <form method="POST" action="{{ url_for('uc04_duyet_don', don_id=don_chon.id) }}" style="display:inline; flex:1;">
+            <button type="submit" class="btn btn-approve" style="width:100%;">✓ Duyệt đơn</button>
+          </div>
+        </form>
+      {% endif %}
+    {% else %}
+      <div class="empty">Chọn 1 hồ sơ ở danh sách bên trái để xem chi tiết.</div>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}
